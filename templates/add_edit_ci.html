@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if ci and ci.id else 'Add New' }} Configuration Item{% endblock %}
+
+{% block content %}
+    <h1>{{ 'Edit' if ci and ci.id else 'Add New' }} Configuration Item</h1>
+
+    <form method="POST" action="{{ url_for(request.endpoint, ci_id=ci.id) if ci and ci.id else url_for(request.endpoint) }}" class="form-styled">
+        <div class="form-group">
+            <label for="ci_name">CI Name:</label>
+            <input type="text" id="ci_name" name="ci_name" value="{{ ci.ci_name if ci else request.form.get('ci_name', '') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="ci_type">Type:</label>
+            <select id="ci_type" name="ci_type" required>
+                <option value="">--- Select Type ---</option>
+                {% for type_option in ci_type_options %}
+                <option value="{{ type_option }}" 
+                        {% if ci and ci.ci_type == type_option %}selected
+                        {% elif request.form.get('ci_type') == type_option %}selected
+                        {% endif %}>
+                    {{ type_option }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="">--- Select Status ---</option>
+                {% for status_option in status_options %}
+                <option value="{{ status_option }}" 
+                        {% if ci and ci.status == status_option %}selected
+                        {% elif request.form.get('status') == status_option %}selected
+                        {% endif %}>
+                    {{ status_option }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="owner">Owner:</label>
+            <input type="text" id="owner" name="owner" value="{{ ci.owner if ci else request.form.get('owner', '') }}">
+        </div>
+
+        <div class="form-group">
+            <label for="ip_location">IP Address / Location:</label>
+            <input type="text" id="ip_location" name="ip_location" value="{{ ci.ip_location if ci else request.form.get('ip_location', '') }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4">{{ ci.description if ci else request.form.get('description', '') }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <input type="submit" value="{{ 'Update Configuration Item' if ci and ci.id else 'Add Configuration Item' }}" class="button">
+            <a href="{{ url_for('list_cis_ui') }}" class="button-secondary">Cancel</a>
+        </div>
+    </form>
+{% endblock %}

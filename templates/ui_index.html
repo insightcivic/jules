@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}CMDB Home{% endblock %}
+{% block content %}
+    <h1>Welcome to the CMDB MVP</h1>
+    <p>This is the main dashboard for the Configuration Management Database.</p>
+    <p>Use the navigation links above to manage Configuration Items (CIs) and their relationships.</p>
+    
+    <h2>Quick Actions:</h2>
+    <ul>
+        <li><a href="{{ url_for('list_cis_ui') }}">View All Configuration Items</a></li>
+        <li><a href="{{ url_for('add_ci_ui') }}">Add a New Configuration Item</a></li>
+        <!-- Add more quick action links as features are developed -->
+    </ul>
+
+    <h2>System Status (Example):</h2>
+    <p>Total CIs: {{ g.total_cis | default('N/A') }}</p>
+    <p>Total Relationships: {{ g.total_relationships | default('N/A') }}</p>
+    
+{% endblock %}
