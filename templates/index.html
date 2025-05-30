@@ -3,10 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask App</title>
+    <title>To-Do List</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Hello, World!</h1>
+    <div class="container">
+        <h1>My To-Do List</h1>
+
+        <h2>Add New To-Do:</h2>
+    <form method="POST" action="{{ url_for('add_todo') }}">
+        <input type="text" name="todo" placeholder="Enter a new to-do item">
+        <input type="submit" value="Add Todo">
+    </form>
+
+    <h2>Current To-Dos:</h2>
+    <ul>
+        {% if todos %}
+            {% for todo in todos %}
+                <li>{{ todo }} <a href="{{ url_for('remove_todo', todo_id=loop.index0) }}" class="remove-link">Remove</a></li>
+            {% endfor %}
+        {% else %}
+            <li>No to-dos yet!</li>
+        {% endif %}
+    </ul>
+    </div>
 </body>
 </html>

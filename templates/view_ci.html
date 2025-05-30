@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}View CI: {{ ci.ci_name if ci else 'Not Found' }}{% endblock %}
+
+{% block content %}
+    {% if ci %}
+        <div class="ci-header">
+            <h1>{{ ci.ci_name }}</h1>
+            <div class="ci-actions">
+                <a href="{{ url_for('edit_ci_ui', ci_id=ci.id) }}" class="button">Edit CI</a>
+                <form method="POST" action="{{ url_for('delete_ci_ui', ci_id=ci.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete {{ ci.ci_name }} (ID: {{ ci.id }})? This will also delete associated relationships.');">
+                    <input type="submit" value="Delete CI" class="button button-danger">
+                </form>
+            </div>
+        </div>
+        
+        <h2>Details</h2>
+        <dl class="details-list">
+            <dt>ID:</dt><dd>{{ ci.id }}</dd>
+            <dt>Type:</dt><dd>{{ ci.ci_type }}</dd>
+            <dt>Status:</dt><dd>{{ ci.status }}</dd>
+            <dt>Owner:</dt><dd>{{ ci.owner if ci.owner else '-' }}</dd>
+            <dt>IP Address / Location:</dt><dd>{{ ci.ip_location if ci.ip_location else '-' }}</dd>
+            <dt>Description:</dt><dd><pre>{{ ci.description if ci.description else '-' }}</pre></dd>
+            <dt>Last Updated:</dt><dd>{{ ci.last_updated.strftime('%Y-%m-%d %H:%M:%S UTC') if ci.last_updated else '-' }}</dd>
+        </dl>
+
+        <h2>Relationships</h2>
+        <p><a href="{{ url_for('add_relationship_ui', ci_id=ci.id) }}" class="button">Add New Relationship</a></p>
+        
+        <div class="relationships-container">
+            <div class="relationship-group">
+                <h3>Related To (This CI is the Source):</h3>
+                {% if source_relationships and source_relationships|length > 0 %}
+                    <ul class="relationship-list">
+                    {% for rel in source_relationships %}
+                        <li>
+                            This CI <strong>{{ rel.relationship_type }}</strong> 
+                            <a href="{{ url_for('view_ci_ui', ci_id=rel.target_ci.id) }}">{{ rel.target_ci.ci_name }}</a>
+                            (Type: {{ rel.target_ci.ci_type }})
+                            <form method="POST" action="{{ url_for('delete_relationship_ui', rel_id=rel.id, ci_id=ci.id) }}" style="display:inline; margin-left: 10px;" onsubmit="return confirm('Are you sure you want to delete the relationship: {{ci.ci_name}} {{rel.relationship_type}} {{ rel.target_ci.ci_name }}?');">
+                                <input type="submit" value="Remove" class="button-small button-danger-link">
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>This CI does not have any outgoing relationships (it is not a source for any relationships).</p>
+                {% endif %}
+            </div>
+
+            <div class="relationship-group">
+                <h3>Dependent On This CI (This CI is the Target):</h3>
+                {% if target_relationships and target_relationships|length > 0 %}
+                    <ul class="relationship-list">
+                    {% for rel in target_relationships %}
+                        <li>
+                            <a href="{{ url_for('view_ci_ui', ci_id=rel.source_ci.id) }}">{{ rel.source_ci.ci_name }}</a>
+                            (Type: {{ rel.source_ci.ci_type }})
+                            <strong>{{ rel.relationship_type }}</strong> this CI
+                            <form method="POST" action="{{ url_for('delete_relationship_ui', rel_id=rel.id, ci_id=ci.id) }}" style="display:inline; margin-left: 10px;" onsubmit="return confirm('Are you sure you want to delete the relationship: {{rel.source_ci.ci_name}} {{rel.relationship_type}} {{ci.ci_name}}?');">
+                                <input type="submit" value="Remove" class="button-small button-danger-link">
+                            </form>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No other CIs have relationships targeting this CI.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% else %}
+        <h1>Configuration Item Not Found</h1>
+        <p>The requested CI could not be found. <a href="{{ url_for('list_cis_ui') }}">Return to list.</a></p>
+    {% endif %}
+{% endblock %}

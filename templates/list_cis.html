@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}CI List{% endblock %}
+
+{% block content %}
+    <h1>Configuration Items</h1>
+    <p><a href="{{ url_for('add_ci_ui') }}" class="button">Add New CI</a></p>
+
+    <details class="filter-details">
+        <summary>Filter/Search CIs</summary>
+        <form method="GET" action="{{ url_for('list_cis_ui') }}" class="filter-form">
+            <div>
+                <label for="ci_name">Name:</label>
+                <input type="text" id="ci_name" name="ci_name" placeholder="Search by Name" value="{{ request.args.get('ci_name', '') }}">
+            </div>
+            <div>
+                <label for="ci_type">Type:</label>
+                <select id="ci_type" name="ci_type">
+                    <option value="">All Types</option>
+                    {% for type_option in ci_type_options %}
+                    <option value="{{ type_option }}" {% if request.args.get('ci_type') == type_option %}selected{% endif %}>{{ type_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="status">Status:</label>
+                <select id="status" name="status">
+                    <option value="">All Statuses</option>
+                    {% for status_option in status_options %}
+                    <option value="{{ status_option }}" {% if request.args.get('status') == status_option %}selected{% endif %}>{{ status_option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="owner">Owner:</label>
+                <input type="text" id="owner" name="owner" placeholder="Search by Owner" value="{{ request.args.get('owner', '') }}">
+            </div>
+            <div>
+                <input type="submit" value="Filter/Search" class="button">
+                <a href="{{ url_for('list_cis_ui') }}" class="button-secondary">Clear Filters</a>
+            </div>
+        </form>
+    </details>
+
+    {% if cis %}
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Owner</th>
+                    <th>IP/Location</th>
+                    <th>Last Updated</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ci in cis %}
+                <tr>
+                    <td><a href="{{ url_for('view_ci_ui', ci_id=ci.id) }}">{{ ci.ci_name }}</a></td>
+                    <td>{{ ci.ci_type }}</td>
+                    <td>{{ ci.status }}</td>
+                    <td>{{ ci.owner if ci.owner else '-' }}</td>
+                    <td>{{ ci.ip_location if ci.ip_location else '-' }}</td>
+                    <td>{{ ci.last_updated.strftime('%Y-%m-%d %H:%M') if ci.last_updated else '-'}}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('view_ci_ui', ci_id=ci.id) }}" class="button-small">View</a>
+                        <a href="{{ url_for('edit_ci_ui', ci_id=ci.id) }}" class="button-small button-edit">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_ci_ui', ci_id=ci.id) }}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete {{ ci.ci_name }} (ID: {{ ci.id }})?');">
+                            <input type="submit" value="Delete" class="button-small button-delete">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No configuration items found matching your criteria. <a href="{{ url_for('add_ci_ui') }}">Add one?</a></p>
+    {% endif %}
+{% endblock %}
