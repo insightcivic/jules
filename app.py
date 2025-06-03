@@ -9,6 +9,7 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cmdb.db'  # Define SQLite DB
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'dev_secret_key_for_flashing' # Replace with a real secret key in production / env var
+todos = []  # Simple in-memory store for the to-do list UI
 db = SQLAlchemy(app)
 
 # --- Models ---
@@ -90,10 +91,30 @@ def before_request_func():
     #        g.total_relationships = "N/A"
 
 
-# --- UI Routes ---
+# --- Simple To-Do UI Routes ---
 @app.route('/')
 def index():
-    return redirect(url_for('ui_index'))
+    """Display the to-do list."""
+    return render_template('index.html', todos=todos)
+
+@app.route('/add', methods=['POST'])
+def add_todo():
+    """Add a new to-do item and redirect back to the list."""
+    todo = request.form.get('todo', '').strip()
+    if todo:
+        todos.append(todo)
+        return redirect(url_for('index'))
+    # If empty string, simply re-render without adding
+    return render_template('index.html', todos=todos)
+
+@app.route('/remove/<int:todo_id>')
+def remove_todo(todo_id):
+    """Remove a to-do item by index if it exists."""
+    if 0 <= todo_id < len(todos):
+        todos.pop(todo_id)
+    return redirect(url_for('index'))
+
+# --- Configuration Management UI Routes ---
 
 @app.route('/ui/')
 def ui_index():
